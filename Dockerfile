@@ -13,6 +13,9 @@ RUN go mod tidy
 # Копируем все файлы проекта в рабочую директорию контейнера
 COPY . .
 
+# Загружаем все модули, чтобы go.sum был актуален
+RUN go mod download
+
 # Собираем исполняемый файл
 RUN go build -o /go-app cmd/main.go
 
