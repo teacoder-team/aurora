@@ -6,7 +6,7 @@
 
 - **Programming Language**: Go (Golang)
 - **Web Framework**: [Gin](https://gin-gonic.com/)
-- **Cloud Storage**: [S3]
+- **Cloud Storage**: S3
 - **Database**: [PostgreSQL](https://www.postgresql.org/)
 - **ORM**: [GORM](https://gorm.io/)
 
