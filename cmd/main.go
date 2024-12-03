@@ -28,8 +28,8 @@ func main() {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
-	
-	router.Use(cors.CORSHandler(cfg))
+
+	router.Use(config.Cors(cfg))
 
 	router.GET("/", routes.IndexHandler)
 	router.POST("/upload", routes.UploadHandler)

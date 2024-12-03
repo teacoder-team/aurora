@@ -1,9 +1,9 @@
 package config
 
 import (
-	"github.com/gin-gonic/gin"
 	"storage/utils"
-	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 func Cors(cfg *utils.Config) gin.HandlerFunc {
