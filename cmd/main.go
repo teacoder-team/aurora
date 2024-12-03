@@ -7,9 +7,6 @@ import (
 	"storage/utils"
 	"strconv"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gin-gonic/gin"
 )
@@ -40,17 +37,13 @@ func main() {
 
 	router.GET("/", routes.IndexHandler)
 	router.POST("/upload", routes.UploadHandler)
+	router.GET("/:tag/:id", routes.GetFileHandler)
 
-	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String(cfg.S3Region),
-		Endpoint:    aws.String(cfg.S3Endpoint),
-		Credentials: credentials.NewStaticCredentials(cfg.S3AccessKeyId, cfg.S3SecretAccessKey, ""),
-	})
+	s3Svc, err := config.InitS3Session()
 	if err != nil {
 		log.Fatalf("❌ Failed to initialize AWS session: %v", err)
 	}
 
-	s3Svc := s3.New(sess)
 	_, err = s3Svc.ListBuckets(&s3.ListBucketsInput{})
 	if err != nil {
 		log.Fatalf("❌ Failed to list S3 buckets: %v", err)

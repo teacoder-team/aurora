@@ -14,8 +14,6 @@ import (
 	_ "image/png"  // Для поддержки PNG
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gin-gonic/gin"
 )
@@ -60,17 +58,11 @@ func UploadHandler(c *gin.Context) {
 
 	// Инициализация S3-сессии
 	cfg, _ := utils.LoadConfig()
-	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String(cfg.S3Region),
-		Endpoint:    aws.String(cfg.S3Endpoint),
-		Credentials: credentials.NewStaticCredentials(cfg.S3AccessKeyId, cfg.S3SecretAccessKey, ""),
-	})
+	s3Svc, err := config.InitS3Session()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to initialize S3 session"})
 		return
 	}
-
-	s3Svc := s3.New(sess)
 
 	// Определяем папку в S3 в зависимости от тега
 	tag := c.PostForm("tag")
