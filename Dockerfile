@@ -22,11 +22,17 @@ FROM alpine:latest
 # Устанавливаем рабочую директорию для приложения
 WORKDIR /root/
 
+# Устанавливаем сертификаты, если требуется
+RUN apk add --no-cache ca-certificates
+
 # Копируем скомпилированный бинарный файл из стадии сборки
-COPY --from=builder /go-app .
+COPY --from=builder /go-app /usr/local/bin/
+
+# Устанавливаем права на исполнение для бинарного файла
+RUN chmod +x /usr/local/bin/go-app
 
 # Экспонируем порт, на котором приложение будет слушать
 EXPOSE 14704
 
 # Команда для запуска приложения
-CMD ["./go-app"]
+CMD ["go-app"]
