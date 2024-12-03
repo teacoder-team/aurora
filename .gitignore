@@ -1,0 +1,50 @@
+# Go binary files
+/bin/
+/obj/
+/build/
+/out/
+
+# Go module and dependencies
+/vendor/
+/go.sum
+
+# Go test files
+*.test
+*.out
+
+# Go coverage reports
+*.coverage
+*.coverprofile
+
+# IDE-specific files (for example, VS Code, GoLand, etc.)
+.vscode/
+/.idea/
+/*.iml
+
+# OS-specific files
+.DS_Store        # macOS
+Thumbs.db        # Windows
+
+# Log files
+*.log
+
+# .env files for environment variables
+.env
+.env.local
+.env.*.local
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# GoLand project files (if using GoLand IDE)
+.idea/
+
+# Exclude test and profile directories
+test/
+profile/

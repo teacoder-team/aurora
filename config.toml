@@ -1,0 +1,22 @@
+jpeg_quality = 80
+
+[tags]
+  [tags.avatars]
+  max_size = 4000000
+  use_ulid = false
+  enabled = true
+  serve_if_field_present = ["object_id", "user_id"]
+  restrict_content_type = "Image"
+
+  [tags.courses]
+  max_size = 6000000
+  use_ulid = false
+  enabled = true
+  serve_if_field_present = ["object_id", "server_id"]
+  restrict_content_type = "Image"
+
+  [tags.attachments]
+  max_size = 20000000
+  use_ulid = false
+  enabled = true
+  serve_if_field_present = ["object_id", "message_id"]
