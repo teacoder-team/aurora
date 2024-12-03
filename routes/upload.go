@@ -8,6 +8,7 @@ import (
 	"storage/config"
 	"storage/models"
 	"storage/utils"
+	"strings"
 	"time"
 
 	_ "image/jpeg" // Для поддержки JPEG
@@ -42,6 +43,22 @@ func UploadHandler(c *gin.Context) {
 		return
 	}
 
+	cfg, _ := utils.LoadConfig()
+
+	// Получаем тег из формы
+	tag := c.PostForm("tag")
+
+	// Проверяем, что тег разрешён
+	allowedTags := map[string]struct{}{}
+	for _, allowedTag := range strings.Split(cfg.AllowedTags, ",") {
+		allowedTags[strings.TrimSpace(allowedTag)] = struct{}{}
+	}
+
+	if _, exists := allowedTags[tag]; !exists {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid tag. Allowed tags are: " + cfg.AllowedTags})
+		return
+	}
+
 	// Генерация уникального ID для файла
 	fileID, err := utils.GenerateID()
 	if err != nil {
@@ -57,7 +74,6 @@ func UploadHandler(c *gin.Context) {
 	}
 
 	// Инициализация S3-сессии
-	cfg, _ := utils.LoadConfig()
 	s3Svc, err := config.InitS3Session()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to initialize S3 session"})
@@ -65,7 +81,6 @@ func UploadHandler(c *gin.Context) {
 	}
 
 	// Определяем папку в S3 в зависимости от тега
-	tag := c.PostForm("tag")
 	var s3Folder string
 	switch tag {
 	case "courses":

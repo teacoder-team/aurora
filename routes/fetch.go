@@ -50,6 +50,8 @@ func GetFileHandler(c *gin.Context) {
 		s3Folder = "courses/"
 	case "avatars":
 		s3Folder = "avatars/"
+	case "attachments":
+		s3Folder = "attachments/"
 	default:
 		s3Folder = "misc/"
 	}

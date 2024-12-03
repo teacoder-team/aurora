@@ -28,12 +28,8 @@ func main() {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
-
-	router.Use(func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		c.Next()
-	})
+	
+	router.Use(cors.CORSHandler(cfg))
 
 	router.GET("/", routes.IndexHandler)
 	router.POST("/upload", routes.UploadHandler)

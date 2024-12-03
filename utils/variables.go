@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -12,6 +13,7 @@ type Config struct {
 	// Application Settings
 	ApplicationPort int
 	ApplicationURL  string
+	AllowedOrigins  []string
 
 	// Postgres Settings
 	PostgresUser     string
@@ -28,9 +30,8 @@ type Config struct {
 	S3SecretAccessKey string
 
 	// Misc Settings
-	UseS3 bool
-
-	ServeConfig string
+	UseS3       bool
+	AllowedTags string
 }
 
 func LoadConfig() (*Config, error) {
@@ -48,9 +49,13 @@ func LoadConfig() (*Config, error) {
 		return nil, err
 	}
 
+	allowedOrigins := getEnv("ALLOWED_ORIGINS", "")
+	allowedOriginsList := strings.Split(allowedOrigins, ",")
+
 	config := &Config{
 		ApplicationPort: applicationPort,
 		ApplicationURL:  os.ExpandEnv(getEnv("APPLICATION_URL", "")),
+		AllowedOrigins:  allowedOriginsList,
 
 		PostgresUser:     getEnv("POSTGRES_USER", ""),
 		PostgresPassword: getEnv("POSTGRES_PASSWORD", ""),
@@ -65,7 +70,7 @@ func LoadConfig() (*Config, error) {
 		S3SecretAccessKey: getEnv("S3_SECRET_ACCESS_KEY", ""),
 
 		UseS3:       getEnv("S3_REGION", "") != "" && getEnv("S3_ENDPOINT", "") != "",
-		ServeConfig: getEnv("SERVE_CONFIG", "JPEG"),
+		AllowedTags: getEnv("ALLOWED_TAGS", ""),
 	}
 
 	if config.UseS3 {
