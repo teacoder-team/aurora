@@ -6,7 +6,6 @@
 
 # Go module and dependencies
 /vendor/
-/go.sum
 
 # Go test files
 *.test
