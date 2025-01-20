@@ -13,21 +13,19 @@ import (
 
 	_ "image/jpeg" // Для поддержки JPEG
 	_ "image/png"  // Для поддержки PNG
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gin-gonic/gin"
+	"path/filepath"
 )
 
 func UploadHandler(c *gin.Context) {
-	// Получаем файл из запроса
 	file, err := c.FormFile("file")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get file from request"})
 		return
 	}
 
-	// Открываем файл
 	src, err := file.Open()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to open file"})
@@ -35,7 +33,6 @@ func UploadHandler(c *gin.Context) {
 	}
 	defer src.Close()
 
-	// Читаем содержимое файла
 	buf := new(bytes.Buffer)
 	_, err = buf.ReadFrom(src)
 	if err != nil {
@@ -45,10 +42,8 @@ func UploadHandler(c *gin.Context) {
 
 	cfg, _ := utils.LoadConfig()
 
-	// Получаем тег из формы
 	tag := c.PostForm("tag")
 
-	// Проверяем, что тег разрешён
 	allowedTags := map[string]struct{}{}
 	for _, allowedTag := range strings.Split(cfg.AllowedTags, ",") {
 		allowedTags[strings.TrimSpace(allowedTag)] = struct{}{}
@@ -59,28 +54,24 @@ func UploadHandler(c *gin.Context) {
 		return
 	}
 
-	// Генерация уникального ID для файла
 	fileID, err := utils.GenerateID()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate file ID"})
 		return
 	}
 
-	// Генерация уникального ID для metadata
 	metadataID, err := utils.GenerateID()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate metadata ID"})
 		return
 	}
 
-	// Инициализация S3-сессии
 	s3Svc, err := config.InitS3Session()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to initialize S3 session"})
 		return
 	}
 
-	// Определяем папку в S3 в зависимости от тега
 	var s3Folder string
 	switch tag {
 	case "courses":
@@ -93,10 +84,9 @@ func UploadHandler(c *gin.Context) {
 		s3Folder = "misc/"
 	}
 
-	// Загружаем файл в S3
 	_, err = s3Svc.PutObject(&s3.PutObjectInput{
 		Bucket:      aws.String(cfg.S3BucketName),
-		Key:         aws.String(s3Folder + fileID), // Используем сгенерированный fileID и путь для тега
+		Key:         aws.String(s3Folder + fileID),
 		Body:        bytes.NewReader(buf.Bytes()),
 		ContentType: aws.String(file.Header.Get("Content-Type")),
 	})
@@ -106,9 +96,12 @@ func UploadHandler(c *gin.Context) {
 		return
 	}
 
-	// Получаем размеры изображения, если файл — это изображение
+	// Определение типа файла
+	fileType := getFileType(file.Filename, file.Header.Get("Content-Type"))
+
+	// Проверка для изображения (ширина и высота)
 	var width, height int
-	if file.Header.Get("Content-Type") == "image/jpeg" || file.Header.Get("Content-Type") == "image/png" {
+	if fileType == "Image" {
 		img, _, err := image.Decode(bytes.NewReader(buf.Bytes()))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to decode image"})
@@ -118,10 +111,9 @@ func UploadHandler(c *gin.Context) {
 		height = img.Bounds().Dy()
 	}
 
-	// Создаем запись в таблице metadata
 	metadata := models.Metadata{
 		ID:     metadataID,
-		Type:   file.Header.Get("Content-Type"),
+		Type:   fileType, // Сохраняем тип файла (Image, Video, Audio, Zip)
 		Width:  width,
 		Height: height,
 	}
@@ -131,12 +123,11 @@ func UploadHandler(c *gin.Context) {
 		return
 	}
 
-	// Создаем запись о файле в таблице files
 	fileRecord := models.File{
 		ID:          fileID,
 		Tag:         tag,
 		Filename:    file.Filename,
-		MetadataID:  metadata.ID, // Используем только что созданный metadataID
+		MetadataID:  metadata.ID,
 		ContentType: file.Header.Get("Content-Type"),
 		Size:        int(file.Size),
 		CreatedAt:   time.Now().Unix(),
@@ -148,10 +139,26 @@ func UploadHandler(c *gin.Context) {
 		return
 	}
 
-	// Возвращаем успешный ответ
 	c.JSON(http.StatusOK, gin.H{
 		"message":  "File uploaded successfully",
 		"file_id":  fileID,
 		"filename": file.Filename,
 	})
+}
+
+// getFileType определяет тип файла (Image, Video, Audio, Zip)
+func getFileType(filename, contentType string) string {
+	ext := strings.ToLower(filepath.Ext(filename))
+	switch {
+	case ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".gif" || ext == ".bmp":
+		return "Image"
+	case ext == ".mp4" || ext == ".avi" || ext == ".mkv" || ext == ".mov":
+		return "Video"
+	case ext == ".mp3" || ext == ".wav" || ext == ".ogg" || ext == ".flac":
+		return "Audio"
+	case ext == ".zip" || ext == ".rar" || ext == ".tar" || ext == ".gz":
+		return "Zip"
+	default:
+		return "Misc"
+	}
 }
