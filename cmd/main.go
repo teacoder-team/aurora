@@ -19,10 +19,6 @@ func main() {
 		log.Fatalf("❌ Failed to load config: %v", err)
 	}
 
-	if err := config.LoadConfigTags(); err != nil {
-		log.Fatalf("❌ Failed to load config tags: %v", err)
-	}
-
 	config.ConnectDatabase(cfg)
 
 	router := gin.New()
