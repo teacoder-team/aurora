@@ -10,8 +10,8 @@ import (
 	"storage/models"
 	"storage/utils"
 
-	_ "image/jpeg" // Для поддержки JPEG
-	_ "image/png"  // Для поддержки PNG
+	_ "image/jpeg"
+	_ "image/png"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -22,12 +22,12 @@ func findFileByID(id, tag string) (*models.File, error) {
 	var file models.File
 	result := config.DB.Where("id = ? AND tag = ? AND deleted IS NULL", id, tag).First(&file)
 	if result.Error != nil {
-		return nil, result.Error // Ошибка, если файл не найден
+		return nil, result.Error
 	}
 	return &file, nil
 }
 
-func GetFileHandler(c *gin.Context) {
+func Fetch(c *gin.Context) {
 	tag := c.Param("tag")
 	id := c.Param("id")
 

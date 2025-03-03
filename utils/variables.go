@@ -10,26 +10,22 @@ import (
 )
 
 type Config struct {
-	// Application Settings
 	ApplicationPort int
 	ApplicationURL  string
 	AllowedOrigins  []string
 
-	// Postgres Settings
 	PostgresUser     string
 	PostgresPassword string
 	PostgresHost     string
 	PostgresPort     int
 	PostgresDatabase string
 
-	// S3 Settings
 	S3Region          string
 	S3Endpoint        string
 	S3BucketName      string
 	S3AccessKeyId     string
 	S3SecretAccessKey string
 
-	// Misc Settings
 	UseS3       bool
 	AllowedTags string
 }

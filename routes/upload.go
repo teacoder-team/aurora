@@ -11,15 +11,16 @@ import (
 	"strings"
 	"time"
 
-	_ "image/jpeg" // Для поддержки JPEG
-	_ "image/png"  // Для поддержки PNG
+	_ "image/jpeg"
+	_ "image/png"
+	"path/filepath"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gin-gonic/gin"
-	"path/filepath"
 )
 
-func UploadHandler(c *gin.Context) {
+func Upload(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get file from request"})
@@ -96,10 +97,8 @@ func UploadHandler(c *gin.Context) {
 		return
 	}
 
-	// Определение типа файла
 	fileType := getFileType(file.Filename, file.Header.Get("Content-Type"))
 
-	// Проверка для изображения (ширина и высота)
 	var width, height int
 	if fileType == "Image" {
 		img, _, err := image.Decode(bytes.NewReader(buf.Bytes()))
@@ -113,7 +112,7 @@ func UploadHandler(c *gin.Context) {
 
 	metadata := models.Metadata{
 		ID:     metadataID,
-		Type:   fileType, // Сохраняем тип файла (Image, Video, Audio, Zip)
+		Type:   fileType,
 		Width:  width,
 		Height: height,
 	}
@@ -146,11 +145,10 @@ func UploadHandler(c *gin.Context) {
 	})
 }
 
-// getFileType определяет тип файла (Image, Video, Audio, Zip)
 func getFileType(filename, contentType string) string {
 	ext := strings.ToLower(filepath.Ext(filename))
 	switch {
-	case ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".gif" || ext == ".bmp":
+	case ext == ".jpg" || ext == ".jpeg" || ext == ".webp" || ext == ".png" || ext == ".gif" || ext == ".bmp":
 		return "Image"
 	case ext == ".mp4" || ext == ".avi" || ext == ".mkv" || ext == ".mov":
 		return "Video"

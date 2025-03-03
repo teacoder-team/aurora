@@ -31,9 +31,9 @@ func main() {
 
 	router.Use(config.Cors(cfg))
 
-	router.GET("/", routes.IndexHandler)
-	router.POST("/upload", routes.UploadHandler)
-	router.GET("/:tag/:id", routes.GetFileHandler)
+	router.GET("/", routes.Get)
+	router.POST("/upload", routes.Upload)
+	router.GET("/:tag/:id", routes.Fetch)
 
 	s3Svc, err := config.InitS3Session()
 	if err != nil {
