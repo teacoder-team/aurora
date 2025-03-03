@@ -1,6 +1,6 @@
-# Storage
+# Aurora
 
-**Storage** is a REST API designed for uploading, storing, and managing files in the cloud using S3 and PostgreSQL.
+**Aurora** is a file storage and delivery service designed for the TeaCoder platform, using S3 and PostgreSQL for cloud storage and data management.
 
 ## Tech Stack
 
