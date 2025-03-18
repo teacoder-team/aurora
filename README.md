@@ -1,6 +1,6 @@
-# Aurora
+# Orion
 
-**Aurora** is a file storage and delivery service designed for the TeaCoder platform, using S3 and PostgreSQL for cloud storage and data management.
+**Orion** is a file storage and delivery service designed for the TeaCoder platform, using S3 and PostgreSQL for cloud storage and data management.
 
 ## Tech Stack
 
