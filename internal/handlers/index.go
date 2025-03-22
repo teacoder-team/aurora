@@ -1,4 +1,4 @@
-package routes
+package handlers
 
 import (
 	"net/http"
@@ -8,6 +8,6 @@ import (
 
 func Get(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Hello! You've reached Aurora Server – a file storage service for teacoder.ru",
+		"message": "Hello! You've reached Orion Server – a file storage service for teacoder.ru",
 	})
 }

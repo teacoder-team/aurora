@@ -1,10 +1,10 @@
 package main
 
 import (
-	"log"
-	"storage/config"
-	"storage/routes"
-	"storage/utils"
+	"orion/config"
+	"orion/internal/handlers"
+	"orion/pkg/logger"
+	"orion/pkg/utils"
 	"strconv"
 
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -14,9 +14,12 @@ import (
 func main() {
 	gin.SetMode(gin.ReleaseMode)
 
+	logger.InitLogger()
+
 	cfg, err := utils.LoadConfig()
 	if err != nil {
-		log.Fatalf("❌ Failed to load config: %v", err)
+		logger.Error("❌ Failed to load config", err)
+		return
 	}
 
 	config.ConnectDatabase(cfg)
@@ -27,25 +30,30 @@ func main() {
 
 	router.Use(config.Cors(cfg))
 
-	router.GET("/", routes.Get)
-	router.POST("/upload", routes.Upload)
-	router.GET("/:tag/:id", routes.Fetch)
+	router.GET("/", handlers.Get)
+	router.POST("/upload", handlers.Upload)
+	router.GET("/:tag/:id", handlers.Fetch)
+	router.DELETE("/:tag/:id", handlers.SoftDelete)
 
-	s3Svc, err := config.InitS3Session()
+	svc, err := config.InitS3Session()
 	if err != nil {
-		log.Fatalf("❌ Failed to initialize AWS session: %v", err)
+		logger.Error("❌ Failed to initialize AWS session", err)
+		return
 	}
 
-	_, err = s3Svc.ListBuckets(&s3.ListBucketsInput{})
+	_, err = svc.ListBuckets(&s3.ListBucketsInput{})
 	if err != nil {
-		log.Fatalf("❌ Failed to list S3 buckets: %v", err)
+		logger.Error("❌ Failed to list S3 buckets", err)
+		return
 	} else {
-		log.Printf("✅ Successfully connected to AWS S3")
+		logger.Info("✅ Successfully connected to AWS S3")
 	}
 
-	log.Printf("🚀 Server is running at: %s\n", cfg.ApplicationURL)
+	address := ":" + strconv.Itoa(cfg.ApplicationPort)
 
-	if err := router.Run(":" + strconv.Itoa(cfg.ApplicationPort)); err != nil {
-		log.Fatalf("❌ Error starting server: %v\n", err)
+	logger.Info("🚀 Server is running at " + cfg.ApplicationURL)
+
+	if err := router.Run(address); err != nil {
+		logger.Error("Error starting server", err)
 	}
 }

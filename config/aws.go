@@ -1,8 +1,8 @@
 package config
 
 import (
-	"log"
-	"storage/utils"
+	"orion/pkg/logger"
+	"orion/pkg/utils"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -13,7 +13,7 @@ import (
 func InitS3Session() (*s3.S3, error) {
 	cfg, err := utils.LoadConfig()
 	if err != nil {
-		log.Printf("❌ Failed to load config: %v", err)
+		logger.Error("❌ Failed to load config: %v", err)
 		return nil, err
 	}
 
@@ -23,7 +23,7 @@ func InitS3Session() (*s3.S3, error) {
 		Credentials: credentials.NewStaticCredentials(cfg.S3AccessKeyId, cfg.S3SecretAccessKey, ""),
 	})
 	if err != nil {
-		log.Printf("❌ Failed to initialize S3 session: %v", err)
+		logger.Error("❌ Failed to initialize S3 session: %v", err)
 		return nil, err
 	}
 

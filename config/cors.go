@@ -1,7 +1,7 @@
 package config
 
 import (
-	"storage/utils"
+	"orion/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 )
