@@ -77,6 +77,7 @@ func Upload(c *gin.Context) {
 		Filename:    file.Filename,
 		ContentType: file.Header.Get("Content-Type"),
 		Size:        int(file.Size),
+		Deleted:     nil,
 	}
 
 	if err := fileRepo.CreateFile(&fileRecord); err != nil {
